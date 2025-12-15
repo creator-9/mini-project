@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Budget Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      input[type="number"] {
+        appearance: textfield;
+        -moz-appearance: textfield;
+      }
+      input[type="number"]::-webkit-outer-spin-button,
+      input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+      }
+    </style>
+  </head>
+  <body class="bg-black text-white">
+    <div class="min-h-screen w-full bg-black flex">
+      <!-- SIDEBAR -->
+      <aside
+        id="sidebar"
+        class="hidden fixed md:sticky md:flex w-64 h-screen bg-zinc-900 border-r border-zinc-800 flex-col transition-all duration-300 z-50 top-0 left-0"
+      >
+        <div class="p-6 border-b border-zinc-800">
+          <h2 class="text-xl font-semibold text-white">Menu</h2>
+        </div>
+        <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+          <a
+            href="dashboard.html"
+            class="block px-4 py-2 text-zinc-400 rounded-lg hover:bg-zinc-800 hover:text-white transition"
+            >Dashboard</a
+          >
+          <a
+            href="budget.html"
+            class="block px-4 py-2 bg-zinc-800 text-white rounded-lg"
+            >Budget</a
+          >
+          <a
+            href="analytics.html"
+            class="block px-4 py-2 text-zinc-400 rounded-lg hover:bg-zinc-800 hover:text-white transition"
+            >Analytics</a
+          >
+          <a
+            href="transacition.html"
+            class="block px-4 py-2 text-zinc-400 rounded-lg hover:bg-zinc-800 hover:text-white transition"
+            >Transactions</a
+          >
+          <a
+            href="settings.html"
+            class="block px-4 py-2 text-zinc-400 rounded-lg hover:bg-zinc-800 hover:text-white transition"
+            >Settings</a
+          >
+        </nav>
+        <button
+          id="closeSidebar"
+          class="md:hidden m-4 px-4 py-2 bg-zinc-800 text-white rounded-lg"
+        >
+          Close
+        </button>
+      </aside>
+
+      <!-- OVERLAY FOR MOBILE -->
+      <div
+        id="sidebarOverlay"
+        class="hidden fixed inset-0 bg-black/50 z-40 md:hidden"
+      ></div>
+
+      <!-- MAIN CONTENT -->
+      <main class="flex-1 p-4 md:p-8 w-full">
+        <!-- HEADER -->
+        <div class="mb-8">
+          <div
+            class="flex items-start gap-4 md:items-center md:justify-between"
+          >
+            <!-- MOBILE HAMBURGER -->
+            <button
+              id="openSidebar"
+              class="p-2 rounded-md bg-zinc-900 border border-zinc-800 text-white md:hidden flex-shrink-0"
+            >
+              <svg
+                class="w-6 h-6"
+                stroke="currentColor"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            </button>
+
+            <!-- TITLE -->
+            <div class="pt-1 flex-1">
+              <h1 class="text-2xl md:text-3xl font-semibold text-white mb-1">
+                Budget Management
+              </h1>
+              <p class="text-zinc-400">
+                Track your monthly budget and spending
+              </p>
+            </div>
+
+            <!-- EDIT BUTTON -->
+            <button
+              id="editBtn"
+              class="hidden md:block px-6 py-3 bg-white text-black font-medium rounded-lg hover:bg-zinc-100"
+            >
+              Edit Budget
+            </button>
+          </div>
+          <div id="mobileActions" class="md:hidden mt-4 flex gap-3"></div>
+        </div>
+
+        <!-- SUMMARY CARDS -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div class="bg-zinc-900 p-6 rounded-lg border border-zinc-800">
+            <h3 class="text-sm text-zinc-400 mb-2">Monthly Budget</h3>
+            <div id="totalBudgetDisplay" class="text-2xl font-semibold">
+              ₹40,000
+            </div>
+            <input
+              id="totalBudgetInput"
+              type="number"
+              value="40000"
+              class="hidden w-full text-2xl font-semibold bg-transparent text-white border-b border-zinc-600 focus:border-white"
+            />
+          </div>
+
+          <div class="bg-zinc-900 p-6 rounded-lg border border-zinc-800">
+            <h3 class="text-sm text-zinc-400 mb-2">Total Spent</h3>
+            <p id="totalSpent" class="text-2xl font-semibold text-red-400">
+              ₹0
+            </p>
+            <p id="spentPercent" class="text-xs text-zinc-500 mt-1">
+              0% of budget
+            </p>
+          </div>
+
+          <div class="bg-zinc-900 p-6 rounded-lg border border-zinc-800">
+            <h3 class="text-sm text-zinc-400 mb-2">Remaining</h3>
+            <p id="remaining" class="text-2xl font-semibold text-green-400">
+              ₹40,000
+            </p>
+            <p id="remainingLabel" class="text-xs text-zinc-500 mt-1">
+              Under budget
+            </p>
+          </div>
+
+          <div class="bg-zinc-900 p-6 rounded-lg border border-zinc-800">
+            <h3 class="text-sm text-zinc-400 mb-2">Unallocated</h3>
+            <p id="unallocated" class="text-2xl font-semibold text-yellow-400">
+              ₹0
+            </p>
+            <p id="unallocatedLabel" class="text-xs text-zinc-500 mt-1">
+              Available to allocate
+            </p>
+          </div>
+        </div>
+
+        <!-- OVERALL PROGRESS -->
+        <div class="bg-zinc-900 p-6 rounded-lg border border-zinc-800 mb-8">
+          <h2 class="text-xl font-semibold mb-6">Overall Budget Progress</h2>
+          <div class="space-y-4">
+            <div class="flex justify-between text-sm">
+              <span class="text-zinc-400">Total Usage</span>
+              <span id="totalUsage">₹0 / ₹40,000</span>
+            </div>
+            <div class="w-full bg-zinc-800 rounded-full h-3">
+              <div
+                id="progressBar"
+                class="h-3 rounded-full bg-green-500"
+                style="width: 0%"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CATEGORY DETAILS -->
+        <div class="bg-zinc-900 rounded-lg border border-zinc-800">
+          <div class="p-6 border-b border-zinc-800">
+            <h2 class="text-xl font-semibold">Category Budgets</h2>
+          </div>
+          <div id="categoriesContainer" class="divide-y divide-zinc-800"></div>
+        </div>
+
+        <!-- TIPS -->
+        <div id="tipsContainer" class="mt-8"></div>
+      </main>
+    </div>
+
+    <script>
+      // STATE
+      const state = {
+        editing: false,
+        totalBudget: 40000,
+        categories: {
+          food: {
+            allocated: 8000,
+            spent: 3290,
+            icon: "🍽️",
+            name: "Food & Dining",
+          },
+          shopping: {
+            allocated: 5000,
+            spent: 2850,
+            icon: "🛍️",
+            name: "Shopping",
+          },
+          transport: {
+            allocated: 3000,
+            spent: 1120,
+            icon: "🚌",
+            name: "Transportation",
+          },
+          housing: {
+            allocated: 15000,
+            spent: 8000,
+            icon: "🏠",
+            name: "Housing",
+          },
+          entertainment: {
+            allocated: 4000,
+            spent: 599,
+            icon: "🎬",
+            name: "Entertainment",
+          },
+          utilities: {
+            allocated: 3000,
+            spent: 1250,
+            icon: "⚡",
+            name: "Utilities",
+          },
+          healthcare: {
+            allocated: 2000,
+            spent: 0,
+            icon: "🏥",
+            name: "Healthcare",
+          },
+        },
+      };
+
+      let isSidebarOpen = false;
+
+      // DOM ELEMENTS
+      const sidebar = document.getElementById("sidebar");
+      const sidebarOverlay = document.getElementById("sidebarOverlay");
+      const openSidebarBtn = document.getElementById("openSidebar");
+      const closeSidebarBtn = document.getElementById("closeSidebar");
+
+      // FORMAT FUNCTIONS
+      const fmt = (amt) =>
+        new Intl.NumberFormat("en-IN", {
+          style: "currency",
+          currency: "INR",
+          maximumFractionDigits: 0,
+        }).format(amt);
+
+      const getColor = (p) =>
+        p >= 90 ? "bg-red-500" : p >= 75 ? "bg-yellow-500" : "bg-green-500";
+
+      // SIDEBAR FUNCTIONS
+      const openSidebar = () => {
+        sidebar.classList.remove("hidden");
+        sidebarOverlay.classList.remove("hidden");
+        isSidebarOpen = true;
+      };
+
+      const closeSidebar = () => {
+        sidebar.classList.add("hidden");
+        sidebarOverlay.classList.add("hidden");
+        isSidebarOpen = false;
+      };
+
+      // EVENT LISTENERS FOR SIDEBAR
+      openSidebarBtn.addEventListener("click", openSidebar);
+      closeSidebarBtn.addEventListener("click", closeSidebar);
+      sidebarOverlay.addEventListener("click", closeSidebar);
+
+      // CALCULATION FUNCTIONS
+      function calc() {
+        const allocated = Object.values(state.categories).reduce(
+          (s, c) => s + c.allocated,
+          0
+        );
+        const spent = Object.values(state.categories).reduce(
+          (s, c) => s + c.spent,
+          0
+        );
+        return {
+          allocated,
+          spent,
+          remaining: state.totalBudget - spent,
+          unallocated: state.totalBudget - allocated,
+        };
+      }
+
+      // UPDATE DISPLAY
+      function update() {
+        const { allocated, spent, remaining, unallocated } = calc();
+        const spent_pct = (spent / state.totalBudget) * 100;
+
+        document.getElementById("totalSpent").textContent = fmt(spent);
+        document.getElementById(
+          "spentPercent"
+        ).textContent = `${spent_pct.toFixed(1)}% of budget`;
+        document.getElementById("remaining").textContent = fmt(remaining);
+        document.getElementById(
+          "remaining"
+        ).className = `text-2xl font-semibold ${
+          remaining >= 0 ? "text-green-400" : "text-red-400"
+        }`;
+        document.getElementById("remainingLabel").textContent =
+          remaining >= 0 ? "Under budget" : "Over budget";
+        document.getElementById("unallocated").textContent = fmt(unallocated);
+        document.getElementById(
+          "unallocated"
+        ).className = `text-2xl font-semibold ${
+          unallocated >= 0 ? "text-yellow-400" : "text-red-400"
+        }`;
+        document.getElementById("unallocatedLabel").textContent =
+          unallocated >= 0 ? "Available to allocate" : "Over-allocated";
+        document.getElementById("progressBar").style.width = `${Math.min(
+          spent_pct,
+          100
+        )}%`;
+        document.getElementById(
+          "progressBar"
+        ).className = `h-3 rounded-full ${getColor(spent_pct)}`;
+        document.getElementById("totalUsage").textContent = `${fmt(
+          spent
+        )} / ${fmt(state.totalBudget)}`;
+
+        renderCategories();
+        renderTips();
+        updateMobileActions();
+      }
+
+      // RENDER CATEGORIES
+      function renderCategories() {
+        const container = document.getElementById("categoriesContainer");
+        container.innerHTML = Object.entries(state.categories)
+          .map(([key, cat]) => {
+            const perc =
+              cat.allocated > 0
+                ? Math.min((cat.spent / cat.allocated) * 100, 100)
+                : 0;
+            const remaining = cat.allocated - cat.spent;
+            return `
+          <div class="p-6">
+            <div class="flex flex-col sm:flex-row sm:justify-between gap-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center text-xl">${
+                  cat.icon
+                }</div>
+                <div>
+                  <h3 class="text-white font-medium">${cat.name}</h3>
+                  <p class="text-sm text-zinc-400">${fmt(
+                    cat.spent
+                  )} spent of ${fmt(cat.allocated)}</p>
+                </div>
+              </div>
+              <div class="text-right">
+                ${
+                  state.editing
+                    ? `<div class="flex gap-2 items-center"><span class="text-zinc-400">₹</span><input type="number" value="${cat.allocated}" data-cat="${key}" class="cat-input w-24 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white" /></div>`
+                    : `<p class="${
+                        remaining >= 0 ? "text-green-400" : "text-red-400"
+                      } text-lg font-semibold">${fmt(
+                        remaining
+                      )}</p><p class="text-sm text-zinc-400">${
+                        remaining >= 0 ? "remaining" : "over budget"
+                      }</p>`
+                }
+              </div>
+            </div>
+            ${
+              !state.editing
+                ? `
+              <div class="mt-4 space-y-2">
+                <div class="flex justify-between text-sm"><span class="text-zinc-400">Progress</span><span class="text-white">${perc.toFixed(
+                  1
+                )}%</span></div>
+                <div class="w-full bg-zinc-800 h-2 rounded-full"><div class="h-2 rounded-full ${getColor(
+                  perc
+                )}" style="width: ${perc}%"></div></div>
+              </div>
+            `
+                : ""
+            }
+          </div>
+        `;
+          })
+          .join("");
+
+        document.querySelectorAll(".cat-input").forEach((input) => {
+          input.addEventListener("change", (e) => {
+            state.categories[e.target.dataset.cat].allocated = Math.max(
+              0,
+              parseInt(e.target.value) || 0
+            );
+            update();
+          });
+        });
+      }
+
+      // RENDER TIPS
+      function renderTips() {
+        const { unallocated } = calc();
+        const container = document.getElementById("tipsContainer");
+        if (unallocated !== 0) {
+          container.innerHTML =
+            unallocated > 0
+              ? `<div class="bg-zinc-900 p-6 rounded-lg border border-zinc-800"><div class="p-4 bg-yellow-900/20 border border-yellow-800 rounded-lg flex gap-3"><span class="text-yellow-400 text-xl">💡</span><div><p class="text-yellow-300 font-medium">Unallocated Budget</p><p class="text-yellow-400 text-sm">You have ${fmt(
+                  unallocated
+                )} unassigned.</p></div></div></div>`
+              : `<div class="bg-zinc-900 p-6 rounded-lg border border-zinc-800"><div class="p-4 bg-red-900/20 border border-red-800 rounded-lg flex gap-3"><span class="text-red-400 text-xl">⚠️</span><div><p class="text-red-300 font-medium">Over-allocated Budget</p><p class="text-red-400 text-sm">You exceeded by ${fmt(
+                  Math.abs(unallocated)
+                )}.</p></div></div></div>`;
+        } else container.innerHTML = "";
+      }
+
+      // UPDATE MOBILE ACTIONS
+      function updateMobileActions() {
+        const container = document.getElementById("mobileActions");
+        if (!state.editing) {
+          container.innerHTML = `<button id="mobileEditBtn" class="flex-1 px-4 py-3 bg-white text-black font-medium rounded-lg">Edit Budget</button>`;
+          document.getElementById("mobileEditBtn").onclick = toggleEdit;
+        } else {
+          container.innerHTML = `
+          <button id="mobileCancel" class="flex-1 px-4 py-3 bg-zinc-700 text-white rounded-lg">Cancel</button>
+          <button id="mobileSave" class="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg">Save</button>
+        `;
+          document.getElementById("mobileCancel").onclick = cancelEdit;
+          document.getElementById("mobileSave").onclick = saveEdit;
+        }
+      }
+
+      // EDIT MODE FUNCTIONS
+      function toggleEdit() {
+        state.editing = true;
+        document.getElementById("totalBudgetDisplay").classList.add("hidden");
+        document.getElementById("totalBudgetInput").classList.remove("hidden");
+        document.getElementById("editBtn").classList.add("hidden");
+        const div = document.createElement("div");
+        div.className = "hidden md:flex gap-3 ml-auto";
+        div.innerHTML = `<button id="desktopCancel" class="px-6 py-3 bg-zinc-700 text-white rounded-lg">Cancel</button><button id="desktopSave" class="px-6 py-3 bg-green-600 text-white rounded-lg">Save Changes</button>`;
+        document.getElementById("editBtn").parentElement.appendChild(div);
+        document.getElementById("desktopCancel").onclick = cancelEdit;
+        document.getElementById("desktopSave").onclick = saveEdit;
+        update();
+      }
+
+      function saveEdit() {
+        state.totalBudget = Math.max(
+          0,
+          parseInt(document.getElementById("totalBudgetInput").value) || 0
+        );
+        state.editing = false;
+        document.getElementById("totalBudgetDisplay").textContent = fmt(
+          state.totalBudget
+        );
+        document
+          .getElementById("totalBudgetDisplay")
+          .classList.remove("hidden");
+        document.getElementById("totalBudgetInput").classList.add("hidden");
+        document.getElementById("editBtn").classList.remove("hidden");
+        document
+          .querySelectorAll(".hidden.md\\:flex")
+          .forEach((el) => el.remove());
+        update();
+      }
+
+      function cancelEdit() {
+        state.editing = false;
+        document.getElementById("totalBudgetInput").value = state.totalBudget;
+        document
+          .getElementById("totalBudgetDisplay")
+          .classList.remove("hidden");
+        document.getElementById("totalBudgetInput").classList.add("hidden");
+        document.getElementById("editBtn").classList.remove("hidden");
+        document
+          .querySelectorAll(".hidden.md\\:flex")
+          .forEach((el) => el.remove());
+        update();
+      }
+
+      document.getElementById("editBtn").onclick = toggleEdit;
+
+      // INITIALIZE
+      update();
+    </script>
+  </body>
+</html>

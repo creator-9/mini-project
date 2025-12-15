@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transactions - Finance Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .spinner {
+        animation: spin 1s linear infinite;
+      }
+    </style>
+  </head>
+  <body class="bg-black">
+    <div class="min-h-screen w-full bg-black flex">
+      <!-- SIDEBAR -->
+      <aside
+        id="sidebar"
+        class="hidden fixed md:sticky md:flex w-64 h-screen bg-zinc-900 border-r border-zinc-800 flex-col transition-all duration-300 z-50 top-0 left-0"
+      >
+        <div class="p-6 border-b border-zinc-800">
+          <h2 class="text-xl font-semibold text-white">Menu</h2>
+        </div>
+        <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+          <a
+            href="dashboard.html"
+            class="block px-4 py-2 text-zinc-400 rounded-lg hover:bg-zinc-800 hover:text-white transition"
+            >Dashboard</a
+          >
+          <a
+            href="budget.html"
+            class="block px-4 py-2 text-zinc-400 rounded-lg hover:bg-zinc-800 hover:text-white transition"
+            >Budget</a
+          >
+          <a
+            href="analytics.html"
+            class="block px-4 py-2 text-zinc-400 rounded-lg hover:bg-zinc-800 hover:text-white transition"
+            >Analytics</a
+          >
+          <a
+            href="transacition.html"
+            class="block px-4 py-2 bg-zinc-800 text-white rounded-lg"
+            >Transactions</a
+          >
+          <a
+            href="settings.html"
+            class="block px-4 py-2 text-zinc-400 rounded-lg hover:bg-zinc-800 hover:text-white transition"
+            >Settings</a
+          >
+        </nav>
+        <button
+          id="closeSidebar"
+          class="md:hidden m-4 px-4 py-2 bg-zinc-800 text-white rounded-lg"
+        >
+          Close
+        </button>
+      </aside>
+
+      <!-- OVERLAY FOR MOBILE -->
+      <div
+        id="sidebarOverlay"
+        class="hidden fixed inset-0 bg-black/50 z-40 md:hidden"
+      ></div>
+
+      <!-- MAIN CONTENT -->
+      <main class="flex-1 p-4 md:p-8 w-full">
+        <!-- HEADER -->
+        <div class="mb-8">
+          <div
+            class="flex items-start gap-4 md:items-center md:justify-between"
+          >
+            <!-- MOBILE HAMBURGER -->
+            <button
+              id="openSidebar"
+              class="p-2 rounded-md bg-zinc-900 border border-zinc-800 text-white md:hidden flex-shrink-0"
+            >
+              <svg
+                class="w-6 h-6"
+                stroke="currentColor"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            </button>
+
+            <!-- TITLE -->
+            <div class="pt-1 flex-1">
+              <h1 class="text-2xl md:text-3xl font-semibold text-white mb-1">
+                All Transactions
+              </h1>
+              <p class="text-zinc-400">
+                Manage and track all your financial activity
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUMMARY CARDS -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div class="bg-zinc-900 p-6 rounded-lg border border-zinc-800">
+            <h3 class="text-sm text-zinc-400 mb-2">Total Income</h3>
+            <p
+              id="totalIncomeValue"
+              class="text-2xl font-semibold text-green-400"
+            >
+              ₹0
+            </p>
+          </div>
+          <div class="bg-zinc-900 p-6 rounded-lg border border-zinc-800">
+            <h3 class="text-sm text-zinc-400 mb-2">Total Expenses</h3>
+            <p
+              id="totalExpensesValue"
+              class="text-2xl font-semibold text-red-400"
+            >
+              ₹0
+            </p>
+          </div>
+          <div class="bg-zinc-900 p-6 rounded-lg border border-zinc-800">
+            <h3 class="text-sm text-zinc-400 mb-2">Net Balance</h3>
+            <p
+              id="netBalanceValue"
+              class="text-2xl font-semibold text-blue-400"
+            >
+              ₹0
+            </p>
+          </div>
+        </div>
+
+        <!-- FILTER PANEL -->
+        <div class="bg-zinc-900 rounded-lg border border-zinc-800 p-6 mb-8">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- SEARCH -->
+            <div class="filter-group">
+              <label for="searchInput" class="block text-sm text-zinc-400 mb-2"
+                >Search</label
+              >
+              <div class="relative">
+                <svg
+                  class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  ></path>
+                </svg>
+                <input
+                  type="text"
+                  id="searchInput"
+                  class="w-full pl-10 pr-4 py-2 bg-black border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:border-zinc-500 focus:outline-none"
+                  placeholder="Search by name..."
+                />
+              </div>
+            </div>
+
+            <!-- CATEGORY -->
+            <div class="filter-group">
+              <label
+                for="categoryFilter"
+                class="block text-sm text-zinc-400 mb-2"
+                >Category</label
+              >
+              <select
+                id="categoryFilter"
+                class="w-full px-4 py-2 bg-black border border-zinc-700 rounded-lg text-white focus:border-zinc-500 focus:outline-none"
+              >
+                <option value="all">All Categories</option>
+                <option value="food">Food</option>
+                <option value="transport">Transport</option>
+                <option value="entertainment">Entertainment</option>
+                <option value="utilities">Utilities</option>
+                <option value="shopping">Shopping</option>
+              </select>
+            </div>
+
+            <!-- TIME RANGE -->
+            <div class="filter-group">
+              <label
+                for="timeRangeFilter"
+                class="block text-sm text-zinc-400 mb-2"
+                >Time Range</label
+              >
+              <select
+                id="timeRangeFilter"
+                class="w-full px-4 py-2 bg-black border border-zinc-700 rounded-lg text-white focus:border-zinc-500 focus:outline-none"
+              >
+                <option value="7days">Last 7 days</option>
+                <option value="30days" selected>Last 30 days</option>
+                <option value="3months">Last 3 months</option>
+                <option value="year">This year</option>
+              </select>
+            </div>
+
+            <!-- SORT -->
+            <div class="filter-group">
+              <label for="sortFilter" class="block text-sm text-zinc-400 mb-2"
+                >Sort By</label
+              >
+              <select
+                id="sortFilter"
+                class="w-full px-4 py-2 bg-black border border-zinc-700 rounded-lg text-white focus:border-zinc-500 focus:outline-none"
+              >
+                <option value="date" selected>Date (Newest)</option>
+                <option value="amount">Amount (Highest)</option>
+                <option value="name">Name (A-Z)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- TRANSACTION LIST -->
+        <div
+          class="bg-zinc-900 rounded-lg border border-zinc-800 overflow-hidden"
+        >
+          <div class="p-6 border-b border-zinc-800">
+            <h2 class="text-xl font-semibold text-white">
+              Transactions (<span id="transactionCount">0</span>)
+            </h2>
+          </div>
+
+          <div id="transactionItems" class="divide-y divide-zinc-800">
+            <!-- Transactions will be populated here -->
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      // DOM Elements
+      const sidebar = document.getElementById("sidebar");
+      const sidebarOverlay = document.getElementById("sidebarOverlay");
+      const openSidebarBtn = document.getElementById("openSidebar");
+      const closeSidebarBtn = document.getElementById("closeSidebar");
+      const searchInput = document.getElementById("searchInput");
+      const categoryFilter = document.getElementById("categoryFilter");
+      const timeRangeFilter = document.getElementById("timeRangeFilter");
+      const sortFilter = document.getElementById("sortFilter");
+      const transactionItems = document.getElementById("transactionItems");
+      const transactionCount = document.getElementById("transactionCount");
+      const totalIncomeValue = document.getElementById("totalIncomeValue");
+      const totalExpensesValue = document.getElementById("totalExpensesValue");
+      const netBalanceValue = document.getElementById("netBalanceValue");
+
+      let isSidebarOpen = false;
+
+      // MOCK DATA
+      const mockUser = {
+        income: 50000,
+        categories: [
+          "Food",
+          "Transport",
+          "Entertainment",
+          "Utilities",
+          "Shopping",
+        ],
+      };
+
+      const mockTransactions = [
+        {
+          id: 1,
+          title: "Lunch at Cafe",
+          description: "Lunch",
+          category: "Food",
+          amount: 450,
+          date: "2025-12-13",
+          type: "expense",
+        },
+        {
+          id: 2,
+          title: "Uber Ride",
+          description: "Travel",
+          category: "Transport",
+          amount: 280,
+          date: "2025-12-12",
+          type: "expense",
+        },
+        {
+          id: 3,
+          title: "Movie Tickets",
+          description: "Movies",
+          category: "Entertainment",
+          amount: 600,
+          date: "2025-12-11",
+          type: "expense",
+        },
+        {
+          id: 4,
+          title: "Electricity Bill",
+          description: "Utilities",
+          category: "Utilities",
+          amount: 1200,
+          date: "2025-12-10",
+          type: "expense",
+        },
+        {
+          id: 5,
+          title: "Grocery Shopping",
+          description: "Groceries",
+          category: "Food",
+          amount: 2500,
+          date: "2025-12-09",
+          type: "expense",
+        },
+        {
+          id: 6,
+          title: "Gas Station",
+          description: "Fuel",
+          category: "Transport",
+          amount: 800,
+          date: "2025-12-08",
+          type: "expense",
+        },
+        {
+          id: 7,
+          title: "Online Shopping",
+          description: "Clothes",
+          category: "Shopping",
+          amount: 3500,
+          date: "2025-12-07",
+          type: "expense",
+        },
+        {
+          id: 8,
+          title: "Concert Ticket",
+          description: "Event",
+          category: "Entertainment",
+          amount: 1500,
+          date: "2025-12-06",
+          type: "expense",
+        },
+      ];
+
+      let transactions = [...mockTransactions];
+
+      // CATEGORY ICONS AND COLORS
+      const categoryIcons = {
+        food: "🍽️",
+        utilities: "⚡",
+        entertainment: "🎬",
+        transport: "🚌",
+        shopping: "🛍️",
+      };
+
+      const categoryColors = {
+        food: "bg-orange-500/20",
+        utilities: "bg-blue-500/20",
+        entertainment: "bg-purple-500/20",
+        transport: "bg-cyan-500/20",
+        shopping: "bg-pink-500/20",
+      };
+
+      // SIDEBAR FUNCTIONS
+      const openSidebar = () => {
+        sidebar.classList.remove("hidden");
+        sidebarOverlay.classList.remove("hidden");
+        isSidebarOpen = true;
+      };
+
+      const closeSidebar = () => {
+        sidebar.classList.add("hidden");
+        sidebarOverlay.classList.add("hidden");
+        isSidebarOpen = false;
+      };
+
+      // EVENT LISTENERS FOR SIDEBAR
+      openSidebarBtn.addEventListener("click", openSidebar);
+      closeSidebarBtn.addEventListener("click", closeSidebar);
+      sidebarOverlay.addEventListener("click", closeSidebar);
+
+      // FILTER HANDLERS
+      searchInput.addEventListener("input", renderTransactions);
+      categoryFilter.addEventListener("change", renderTransactions);
+      timeRangeFilter.addEventListener("change", renderTransactions);
+      sortFilter.addEventListener("change", renderTransactions);
+
+      // FORMAT CURRENCY
+      function formatCurrency(amount) {
+        return new Intl.NumberFormat("en-IN", {
+          style: "currency",
+          currency: "INR",
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0,
+        }).format(Math.abs(amount));
+      }
+
+      // FORMAT DATE
+      function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        });
+      }
+
+      function formatTime(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+
+      // FILTER TRANSACTIONS
+      function getFilteredTransactions() {
+        let filtered = transactions.filter((t) => {
+          const searchMatch =
+            t.title.toLowerCase().includes(searchInput.value.toLowerCase()) ||
+            t.description
+              .toLowerCase()
+              .includes(searchInput.value.toLowerCase());
+
+          const categoryMatch =
+            categoryFilter.value === "all" ||
+            t.category.toLowerCase() === categoryFilter.value;
+
+          return searchMatch && categoryMatch;
+        });
+
+        // SORT
+        filtered.sort((a, b) => {
+          switch (sortFilter.value) {
+            case "date":
+              return new Date(b.date) - new Date(a.date);
+            case "amount":
+              return b.amount - a.amount;
+            case "name":
+              return a.title.localeCompare(b.title);
+            default:
+              return 0;
+          }
+        });
+
+        return filtered;
+      }
+
+      // RENDER TRANSACTIONS
+      function renderTransactions() {
+        const filtered = getFilteredTransactions();
+
+        transactionCount.textContent = filtered.length;
+
+        if (filtered.length === 0) {
+          transactionItems.innerHTML =
+            '<div class="p-8 text-center text-zinc-400">No transactions found.</div>';
+          return;
+        }
+
+        transactionItems.innerHTML = filtered
+          .map((t) => {
+            const categoryLower = t.category.toLowerCase();
+            const icon = categoryIcons[categoryLower] || "📌";
+            const colorClass =
+              categoryColors[categoryLower] || "bg-zinc-700/50";
+            const amountClass =
+              t.type === "expense" ? "text-red-400" : "text-green-400";
+
+            return `
+              <div class="p-6 hover:bg-zinc-800/50 transition flex items-center justify-between gap-4">
+                <div class="flex items-center gap-4 flex-1 min-w-0">
+                  <div class="w-12 h-12 rounded-lg ${colorClass} flex items-center justify-center text-xl flex-shrink-0">
+                    ${icon}
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-white font-medium truncate">${t.title}</p>
+                    <p class="text-sm text-zinc-500">${formatDate(
+                      t.date
+                    )} • ${formatTime(t.date)}</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-4 justify-end">
+                  <p class="text-lg font-semibold ${amountClass} whitespace-nowrap">
+                    ${t.type === "expense" ? "-" : "+"}${formatCurrency(
+              t.amount
+            )}
+                  </p>
+                  <button class="delete-btn p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition" onclick="deleteTransaction(${
+                    t.id
+                  }, '${t.title}')">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 7L18 19a2 2 0 01-2 2H8a2 2 0 01-2-2L5 7m5 4v6m4-6v6M4 7h16M9 4h6a1 1 0 011 1v2H8V5a1 1 0 011-1z"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            `;
+          })
+          .join("");
+
+        updateSummary(filtered);
+      }
+
+      // UPDATE SUMMARY
+      function updateSummary(filtered) {
+        const totalIncome = mockUser.income;
+        const totalExpenses = filtered.reduce(
+          (sum, t) => sum + (t.type === "expense" ? t.amount : 0),
+          0
+        );
+        const netBalance = totalIncome - totalExpenses;
+
+        totalIncomeValue.textContent = formatCurrency(totalIncome);
+        totalExpensesValue.textContent = formatCurrency(totalExpenses);
+        netBalanceValue.textContent = formatCurrency(netBalance);
+      }
+
+      // DELETE TRANSACTION
+      window.deleteTransaction = function (id, title) {
+        if (confirm(`Are you sure you want to delete "${title}"?`)) {
+          transactions = transactions.filter((t) => t.id !== id);
+          renderTransactions();
+        }
+      };
+
+      // INITIALIZE
+      renderTransactions();
+    </script>
+  </body>
+</html>

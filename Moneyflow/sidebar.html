@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FinBuddy - Sidebar</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: #000;
+        color: #fff;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        line-height: 1.6;
+        min-height: 100vh;
+        display: flex;
+      }
+
+      /* SIDEBAR STYLING */
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100em;
+        width: 256px;
+        background-color: #18181b;
+        border-right: 1px solid #27272a;
+        display: flex;
+        flex-direction: column;
+        transform: translateX(0);
+        transition: transform 0.3s ease-in-out;
+        z-index: 50;
+      }
+
+      @media (max-width: 768px) {
+        .sidebar {
+          transform: translateX(-100%);
+        }
+
+        .sidebar.open {
+          transform: translateX(0);
+        }
+      }
+
+      /* SIDEBAR HEADER */
+      .sidebar-header {
+        padding: 24px 12px;
+        border-bottom: 1px solid #27272a;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .sidebar-logo {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: transparent;
+      }
+
+      .sidebar-logo span {
+        font-size: 24px;
+      }
+
+      .sidebar-brand {
+        color: #fff;
+        font-weight: 600;
+        font-size: 18px;
+      }
+
+      /* SIDEBAR NAV */
+      .sidebar-nav {
+        flex: 1;
+        padding: 16px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .nav-item {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 12px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #a1a1a1;
+        text-decoration: none;
+        transition: all 0.3s;
+        cursor: pointer;
+        border: none;
+        background: none;
+      }
+
+      .nav-item:hover {
+        color: #fff;
+        background-color: rgba(39, 39, 42, 0.5);
+      }
+
+      .nav-item.active {
+        background-color: #27272a;
+        color: #fff;
+      }
+
+      .nav-icon {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .nav-icon svg {
+        width: 100%;
+        height: 100%;
+        stroke: currentColor;
+        stroke-width: 2;
+        fill: none;
+      }
+
+      /* SIDEBAR FOOTER */
+      .sidebar-footer {
+        padding: 16px;
+        border-top: 1px solid #27272a;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .user-profile {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+      }
+
+      .user-avatar {
+        width: 32px;
+        height: 32px;
+        background-color: #27272a;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 500;
+        flex-shrink: 0;
+      }
+
+      .user-info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .user-name {
+        font-size: 14px;
+        font-weight: 500;
+        color: #fff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .user-email {
+        font-size: 12px;
+        color: #a1a1a1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .logout-btn {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 12px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #f87171;
+        border: 1px solid transparent;
+        background: none;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .logout-btn:hover {
+        color: #fca5a5;
+        background-color: rgba(239, 68, 68, 0.1);
+        border-color: rgba(239, 68, 68, 0.2);
+      }
+
+      /* OVERLAY */
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        z-index: 40;
+      }
+
+      .sidebar-overlay.show {
+        display: block;
+      }
+
+      @media (min-width: 768px) {
+        .sidebar-overlay {
+          display: none !important;
+        }
+      }
+
+      /* MAIN CONTENT */
+      .main-content {
+        flex: 1;
+        margin-left: 256px;
+        padding: 32px;
+      }
+
+      @media (max-width: 768px) {
+        .main-content {
+          margin-left: 0;
+          padding: 16px;
+        }
+      }
+
+      /* MOBILE TOGGLE BUTTON */
+      .mobile-toggle {
+        display: none;
+        position: fixed;
+        top: 16px;
+        left: 16px;
+        z-index: 51;
+        background-color: #27272a;
+        border: none;
+        border-radius: 6px;
+        color: #fff;
+        padding: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .mobile-toggle:hover {
+        background-color: #3f3f46;
+      }
+
+      .mobile-toggle svg {
+        width: 24px;
+        height: 24px;
+      }
+
+      @media (max-width: 768px) {
+        .mobile-toggle {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+      }
+
+      /* DEMO CONTENT */
+      .demo-content {
+        max-width: 1200px;
+      }
+
+      .demo-content h1 {
+        font-size: 32px;
+        margin-bottom: 16px;
+      }
+
+      .demo-content p {
+        color: #a1a1a1;
+        font-size: 16px;
+        line-height: 1.6;
+      }
+
+      .content-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 16px;
+        margin-top: 24px;
+      }
+
+      .content-card {
+        background-color: #18181b;
+        border: 1px solid #27272a;
+        border-radius: 8px;
+        padding: 16px;
+      }
+
+      .content-card h3 {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+
+      .content-card p {
+        font-size: 14px;
+        color: #71717a;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- MOBILE TOGGLE BUTTON -->
+    <button class="mobile-toggle" id="sidebarToggle">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M4 6h16M4 12h16M4 18h16"
+        ></path>
+      </svg>
+    </button>
+
+    <!-- SIDEBAR OVERLAY -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <!-- SIDEBAR HEADER -->
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <span>💰</span>
+        </div>
+        <span class="sidebar-brand">FinBuddy</span>
+      </div>
+
+      <!-- SIDEBAR NAV -->
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="nav-item active" data-route="dashboard">
+          <div class="nav-icon">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
+              ></path>
+              <path d="M8 5v4m8-4v4"></path>
+            </svg>
+          </div>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="transacition.html" class="nav-item" data-route="transactions">
+          <div class="nav-icon">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+              ></path>
+            </svg>
+          </div>
+          <span>Transactions</span>
+        </a>
+
+        <a href="budget.html" class="nav-item" data-route="budgets">
+          <div class="nav-icon">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
+              ></path>
+            </svg>
+          </div>
+          <span>Budgets</span>
+        </a>
+
+        <a href="analytics.html" class="nav-item" data-route="analytics">
+          <div class="nav-icon">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+              ></path>
+            </svg>
+          </div>
+          <span>Analytics</span>
+        </a>
+      </nav>
+
+      <!-- SIDEBAR FOOTER -->
+      <div class="sidebar-footer">
+        <!-- USER PROFILE -->
+        <div class="user-profile">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <div class="user-info">
+            <div class="user-name" id="userName">User Name</div>
+            <div class="user-email" id="userEmail">user@example.com</div>
+          </div>
+        </div>
+
+        <!-- SETTINGS BUTTON -->
+        <a href="settings.html" class="nav-item" data-route="settings">
+          <div class="nav-icon">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+              ></path>
+              <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+          </div>
+          <span>Settings</span>
+        </a>
+
+        <!-- LOGOUT BUTTON -->
+        <button class="logout-btn" id="logoutBtn">
+          <div class="nav-icon">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+              ></path>
+            </svg>
+          </div>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+      <div class="demo-content">
+        <h1>Welcome to FinBuddy</h1>
+        <p>
+          This is a responsive sidebar navigation component. Click the menu icon
+          on mobile to toggle the sidebar.
+        </p>
+
+        <div class="content-grid">
+          <div class="content-card">
+            <h3>Dashboard</h3>
+            <p>View your financial overview and key statistics</p>
+          </div>
+          <div class="content-card">
+            <h3>Transactions</h3>
+            <p>Track and manage all your financial transactions</p>
+          </div>
+          <div class="content-card">
+            <h3>Budgets</h3>
+            <p>Create and monitor your spending budgets</p>
+          </div>
+          <div class="content-card">
+            <h3>Analytics</h3>
+            <p>Analyze your spending patterns and trends</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // DOM Elements
+      const sidebar = document.getElementById("sidebar");
+      const sidebarToggle = document.getElementById("sidebarToggle");
+      const sidebarOverlay = document.getElementById("sidebarOverlay");
+      const navItems = document.querySelectorAll(".nav-item");
+      const logoutBtn = document.getElementById("logoutBtn");
+      const userAvatar = document.getElementById("userAvatar");
+      const userName = document.getElementById("userName");
+      const userEmail = document.getElementById("userEmail");
+
+      // SIDEBAR TOGGLE
+      sidebarToggle.addEventListener("click", () => {
+        sidebar.classList.toggle("open");
+        sidebarOverlay.classList.toggle("show");
+      });
+
+      sidebarOverlay.addEventListener("click", () => {
+        sidebar.classList.remove("open");
+        sidebarOverlay.classList.remove("show");
+      });
+
+      // NAV ITEM CLICK - CLOSE SIDEBAR ON MOBILE
+      navItems.forEach((item) => {
+        item.addEventListener("click", () => {
+          sidebar.classList.remove("open");
+          sidebarOverlay.classList.remove("show");
+        });
+      });
+
+      // SET ACTIVE NAV ITEM
+      function setActiveNav() {
+        const currentPath = window.location.pathname;
+
+        navItems.forEach((item) => {
+          const href = item.getAttribute("href");
+          if (currentPath.includes(href)) {
+            item.classList.add("active");
+          } else {
+            item.classList.remove("active");
+          }
+        });
+      }
+
+      // LOAD USER DATA
+      function loadUserData() {
+        const currentUser = localStorage.getItem("currentUser");
+
+        if (currentUser) {
+          try {
+            const user = JSON.parse(currentUser);
+            const initial = user.username
+              ? user.username.charAt(0).toUpperCase()
+              : "U";
+
+            userAvatar.textContent = initial;
+            userName.textContent = user.username || "User";
+            userEmail.textContent = user.email || "user@example.com";
+          } catch (e) {
+            console.error("Error parsing user data:", e);
+          }
+        }
+      }
+
+      // LOGOUT HANDLER
+      logoutBtn.addEventListener("click", () => {
+        localStorage.removeItem("currentUser");
+        localStorage.removeItem("users");
+        window.location.href = "welcome.html";
+      });
+
+      // CLOSE SIDEBAR ON WINDOW RESIZE (IF SCREEN BECOMES DESKTOP)
+      window.addEventListener("resize", () => {
+        if (window.innerWidth > 768) {
+          sidebar.classList.remove("open");
+          sidebarOverlay.classList.remove("show");
+        }
+      });
+
+      // INITIALIZE
+      loadUserData();
+      setActiveNav();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - Finance Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+      }
+    </style>
+  </head>
+  <body class="bg-black">
+    <div class="min-h-screen w-full bg-black flex">
+      <!-- SIDEBAR -->
+      <aside
+        id="sidebar"
+        class="hidden fixed md:sticky md:flex w-64 h-screen bg-zinc-900 border-r border-zinc-800 flex-col transition-all duration-300 z-50 top-0 left-0"
+      >
+        <div class="p-6 border-b border-zinc-800">
+          <h2 class="text-xl font-semibold text-white">Menu</h2>
+        </div>
+        <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+          <a
+            href="dashboard.html"
+            class="block px-4 py-2 bg-zinc-800 text-white rounded-lg"
+            >Dashboard</a
+          >
+          <a
+            href="budget.html"
+            class="block px-4 py-2 text-zinc-400 rounded-lg hover:bg-zinc-800 hover:text-white transition"
+            >Budget</a
+          >
+          <a
+            href="analytics.html"
+            class="block px-4 py-2 text-zinc-400 rounded-lg hover:bg-zinc-800 hover:text-white transition"
+            >Analytics</a
+          >
+          <a
+            href="transacition.html"
+            class="block px-4 py-2 text-zinc-400 rounded-lg hover:bg-zinc-800 hover:text-white transition"
+            >Transactions</a
+          >
+          <a
+            href="settings.html"
+            class="block px-4 py-2 text-zinc-400 rounded-lg hover:bg-zinc-800 hover:text-white transition"
+            >Settings</a
+          >
+        </nav>
+        <button
+          id="closeSidebar"
+          class="md:hidden m-4 px-4 py-2 bg-zinc-800 text-white rounded-lg"
+        >
+          Close
+        </button>
+      </aside>
+
+      <!-- OVERLAY FOR MOBILE -->
+      <div
+        id="sidebarOverlay"
+        class="hidden fixed inset-0 bg-black/50 z-40 md:hidden"
+      ></div>
+
+      <!-- MAIN CONTENT -->
+      <main class="flex-1 p-4 md:p-8 w-full">
+        <!-- HEADER -->
+        <div class="mb-8">
+          <div
+            class="flex items-start gap-4 md:items-center md:justify-between"
+          >
+            <!-- MOBILE HAMBURGER -->
+            <button
+              id="openSidebar"
+              class="p-2 rounded-md bg-zinc-900 border border-zinc-800 text-white md:hidden flex-shrink-0"
+            >
+              <svg
+                class="w-6 h-6"
+                stroke="currentColor"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            </button>
+
+            <!-- TITLE -->
+            <div class="pt-1 flex-1">
+              <h1 class="text-2xl md:text-3xl font-semibold text-white mb-1">
+                Dashboard
+              </h1>
+              <p class="text-zinc-400">Welcome to your finance manager</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- STAT CARDS -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <!-- TOTAL INCOME -->
+          <div class="bg-zinc-900 p-6 rounded-lg border border-zinc-800">
+            <h3 class="text-sm text-zinc-400 mb-2">Total Income</h3>
+            <p
+              id="totalIncomeDisplay"
+              class="text-2xl font-semibold text-green-400"
+            >
+              ₹0
+            </p>
+            <p class="text-xs text-zinc-500 mt-1">This month</p>
+          </div>
+
+          <!-- TOTAL SPENT -->
+          <div class="bg-zinc-900 p-6 rounded-lg border border-zinc-800">
+            <h3 class="text-sm text-zinc-400 mb-2">Total Spent</h3>
+            <p
+              id="totalSpentDisplay"
+              class="text-2xl font-semibold text-red-400"
+            >
+              ₹0
+            </p>
+            <p class="text-xs text-zinc-500 mt-1">This month</p>
+          </div>
+
+          <!-- REMAINING -->
+          <div class="bg-zinc-900 p-6 rounded-lg border border-zinc-800">
+            <h3 class="text-sm text-zinc-400 mb-2">Remaining Balance</h3>
+            <p
+              id="remainingDisplay"
+              class="text-2xl font-semibold text-blue-400"
+            >
+              ₹0
+            </p>
+            <p class="text-xs text-zinc-500 mt-1">Available</p>
+          </div>
+        </div>
+
+        <!-- CATEGORIES BREAKDOWN -->
+        <div class="bg-zinc-900 rounded-lg border border-zinc-800 p-6 mb-8">
+          <h2 class="text-xl font-semibold text-white mb-6">
+            Spending by Category
+          </h2>
+          <div
+            id="categoriesContainer"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+          >
+            <!-- Categories will be populated here -->
+          </div>
+        </div>
+
+        <!-- RECENT TRANSACTIONS -->
+        <div class="bg-zinc-900 rounded-lg border border-zinc-800 p-6">
+          <h2 class="text-xl font-semibold text-white mb-6">Recent Activity</h2>
+          <div id="recentActivityContainer" class="space-y-4">
+            <!-- Recent transactions will be populated here -->
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      // STATE
+      let userData = {
+        totalIncome: 50000,
+        expenses: [
+          {
+            id: 1,
+            title: "Lunch at Cafe",
+            category: "food",
+            amount: 450,
+            date: "2025-12-13",
+          },
+          {
+            id: 2,
+            title: "Uber Ride",
+            category: "transport",
+            amount: 280,
+            date: "2025-12-12",
+          },
+          {
+            id: 3,
+            title: "Movie Tickets",
+            category: "entertainment",
+            amount: 600,
+            date: "2025-12-11",
+          },
+          {
+            id: 4,
+            title: "Electricity Bill",
+            category: "utilities",
+            amount: 1200,
+            date: "2025-12-10",
+          },
+          {
+            id: 5,
+            title: "Grocery Shopping",
+            category: "food",
+            amount: 2500,
+            date: "2025-12-09",
+          },
+        ],
+      };
+
+      let isSidebarOpen = false;
+
+      const categoryIcons = {
+        food: { icon: "🍽️", name: "Food & Dining", color: "bg-orange-500/20" },
+        shopping: { icon: "🛍️", name: "Shopping", color: "bg-pink-500/20" },
+        transport: {
+          icon: "🚌",
+          name: "Transportation",
+          color: "bg-cyan-500/20",
+        },
+        housing: { icon: "🏠", name: "Housing", color: "bg-blue-500/20" },
+        entertainment: {
+          icon: "🎬",
+          name: "Entertainment",
+          color: "bg-purple-500/20",
+        },
+        utilities: { icon: "⚡", name: "Utilities", color: "bg-yellow-500/20" },
+        healthcare: { icon: "🏥", name: "Healthcare", color: "bg-red-500/20" },
+      };
+
+      // DOM ELEMENTS
+      const sidebar = document.getElementById("sidebar");
+      const sidebarOverlay = document.getElementById("sidebarOverlay");
+      const openSidebarBtn = document.getElementById("openSidebar");
+      const closeSidebarBtn = document.getElementById("closeSidebar");
+      const totalIncomeDisplay = document.getElementById("totalIncomeDisplay");
+      const totalSpentDisplay = document.getElementById("totalSpentDisplay");
+      const remainingDisplay = document.getElementById("remainingDisplay");
+      const categoriesContainer = document.getElementById(
+        "categoriesContainer"
+      );
+      const recentActivityContainer = document.getElementById(
+        "recentActivityContainer"
+      );
+
+      // UTILITY FUNCTIONS
+      const formatAmount = (amt) => {
+        return new Intl.NumberFormat("en-IN", {
+          style: "currency",
+          currency: "INR",
+          maximumFractionDigits: 0,
+        }).format(amt);
+      };
+
+      const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("en-IN", {
+          month: "short",
+          day: "numeric",
+        });
+      };
+
+      // SIDEBAR FUNCTIONS
+      const openSidebar = () => {
+        sidebar.classList.remove("hidden");
+        sidebarOverlay.classList.remove("hidden");
+        isSidebarOpen = true;
+      };
+
+      const closeSidebar = () => {
+        sidebar.classList.add("hidden");
+        sidebarOverlay.classList.add("hidden");
+        isSidebarOpen = false;
+      };
+
+      // EVENT LISTENERS FOR SIDEBAR
+      openSidebarBtn.addEventListener("click", openSidebar);
+      closeSidebarBtn.addEventListener("click", closeSidebar);
+      sidebarOverlay.addEventListener("click", closeSidebar);
+
+      // UPDATE STATS
+      const updateStats = () => {
+        const totalSpent = userData.expenses.reduce(
+          (sum, e) => sum + e.amount,
+          0
+        );
+        const remaining = userData.totalIncome - totalSpent;
+
+        totalIncomeDisplay.textContent = formatAmount(userData.totalIncome);
+        totalSpentDisplay.textContent = formatAmount(totalSpent);
+        remainingDisplay.textContent = formatAmount(remaining);
+      };
+
+      // UPDATE CATEGORIES
+      const updateCategories = () => {
+        const categoryTotals = {};
+
+        userData.expenses.forEach((exp) => {
+          if (!categoryTotals[exp.category]) {
+            categoryTotals[exp.category] = 0;
+          }
+          categoryTotals[exp.category] += exp.amount;
+        });
+
+        categoriesContainer.innerHTML = "";
+
+        Object.entries(categoryTotals).forEach(([key, total]) => {
+          const info = categoryIcons[key] || categoryIcons.food;
+          const categoryEl = document.createElement("div");
+          categoryEl.className =
+            "p-4 rounded-lg bg-zinc-800/50 border border-zinc-700/50";
+          categoryEl.innerHTML = `
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-zinc-700 flex items-center justify-center text-lg">
+                ${info.icon}
+              </div>
+              <div class="flex-1">
+                <p class="text-sm text-zinc-400">${info.name}</p>
+                <p class="text-lg font-semibold text-white">${formatAmount(
+                  total
+                )}</p>
+              </div>
+            </div>
+          `;
+          categoriesContainer.appendChild(categoryEl);
+        });
+      };
+
+      // UPDATE RECENT ACTIVITY
+      const updateRecentActivity = () => {
+        const sortedExpenses = [...userData.expenses].sort(
+          (a, b) => new Date(b.date) - new Date(a.date)
+        );
+
+        recentActivityContainer.innerHTML = sortedExpenses
+          .slice(0, 5)
+          .map((exp) => {
+            const info = categoryIcons[exp.category] || categoryIcons.food;
+            return `
+              <div class="flex items-center justify-between p-4 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-zinc-700 flex items-center justify-center text-lg">
+                    ${info.icon}
+                  </div>
+                  <div>
+                    <p class="text-sm text-white font-medium">${exp.title}</p>
+                    <p class="text-xs text-zinc-500">${formatDate(exp.date)}</p>
+                  </div>
+                </div>
+                <p class="text-sm font-semibold text-red-400">-${formatAmount(
+                  exp.amount
+                )}</p>
+              </div>
+            `;
+          })
+          .join("");
+      };
+
+      // INITIALIZE
+      const init = () => {
+        updateStats();
+        updateCategories();
+        updateRecentActivity();
+      };
+
+      init();
+    </script>
+  </body>
+</html>

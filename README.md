@@ -1,6 +1,6 @@
 # 💰 MoneyFlow
 
-A streamlined personal finance tool designed for **effortless manual track of expenses** and **intuitive visualization**. It helps users control overspending and understand their financial habits without the complexity of traditional apps or spreadsheets.
+A streamlined personal finance tool designed for **effortless  track of expenses** and **intuitive visualization**. It helps users control overspending and understand their financial habits without the complexity of traditional apps or spreadsheets.
 
 ---
 
